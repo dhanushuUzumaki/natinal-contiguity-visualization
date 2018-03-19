@@ -1,0 +1,83 @@
+:root {
+  --whitishBg: #eee;
+  --primary: #2f3536;
+  --secondary: #ffcc54;
+  --primaryLight: #585f60;
+  --primaryDark: #060f10;
+  --secondaryLight: #ffff85;
+  --secondaryDark: #c89b20;
+  --primaryText: #ffffff;
+  --secondaryText: #000000;
+}
+
+body {
+  background: var(--primary);
+  color: var(--whitishBg);
+}
+
+.item {
+  cursor: pointer;
+}
+
+.axis path {
+  stroke: var(--whitishBg);
+}
+
+.axis line {
+  stroke: var(--whitishBg);
+}
+
+.axis text {
+  font-size: 1em;
+  stroke: var(--whitishBg);
+}
+
+.details {
+  text-align: center;
+  padding: 10px;
+  font-size: 1.2em;
+}
+
+.label {
+  stroke: none;
+  fill: var(--whitishBg);
+}
+
+.tooltip {
+  border-radius: 5px;
+  background: var(--whitishBg);
+  color: var(--primaryDark);
+  position: fixed;
+  top: 10%;
+  right: 20px;
+  opacity: 0.8;
+  visibility: visible;
+  text-align: center;
+  padding: 10px;
+  max-width: 15%;
+  overflow-wrap: break-word;
+  transition: opacity 0.2s ease-in 0.2s;
+}
+
+.tooltip.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.line {
+  fill: none;
+  stroke: white;
+  stroke-width: 2px;
+}
+
+text.mono {
+  font-size: 9pt;
+  font-family: Consolas, courier;
+  fill: #aaa;
+}
+
+.link {
+  stroke: var(--whitishBg);
+  stroke-opacity: .6;
+  stroke-width: 1px;
+}
