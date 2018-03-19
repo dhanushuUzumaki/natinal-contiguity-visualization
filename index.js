@@ -61,39 +61,132 @@ const plotData = (data) => {
     .style('fill', d => colorScale(d.variance + baseTemp))
     .on('mouseover', d => {
       tooltip.classList.remove('hidden');
-      tooltip.innerHTML = `${months[d.month-1]}, ${d.year}<br />Temp: ${(d.variance + baseTemp).toFixed(3)} &deg;C<br />Variance: ${d.variance} &deg;C`;
+      tooltip.innerHTML = `${months[d.month - 1]}, ${d.year}<br />Temp: ${(d.variance + baseTemp).toFixed(3)} &deg;C<br />Variance: ${d.variance} &deg;C`;
     })
     .on('mouseout', d => {
       tooltip.classList.add('hidden');
     })
     .exit();
 
-  const legend = svg.selectAll(".legend")
+  const legend = svg.selectAll('.legend')
     .data([0].concat(colorScale.quantiles()), (d) => d);
 
-  const legend_g = legend.enter().append("g")
-    .attr("class", "legend");
-  legend_g.append("rect")
-    .attr("x", (d, i) => legendElementSize * i)
-    .attr("y", height + 40)
-    .attr("width", legendElementSize)
-    .attr("height", 30)
-    .style("fill", (d, i) => colors[i]);
+  const legend_g = legend.enter().append('g')
+    .attr('class', 'legend');
+  legend_g.append('rect')
+    .attr('x', (d, i) => legendElementSize * i)
+    .attr('y', height + 40)
+    .attr('width', legendElementSize)
+    .attr('height', 30)
+    .style('fill', (d, i) => colors[i]);
 
-  legend_g.append("text")
-    .attr("class", "mono")
+  legend_g.append('text')
+    .attr('class', 'mono')
     .text((d) => d.toFixed(2))
-    .attr("x", (d, i) => legendElementSize * i)
-    .attr("y", height + 80 );
+    .attr('x', (d, i) => legendElementSize * i)
+    .attr('y', height + 80);
 
   legend.exit();
 
 }
 
+const dragstarted = d => {
+  if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+  d.fx = d.x;
+  d.fy = d.y;
+}
+
+const dragged = d => {
+  d.fx = d3.event.x;
+  d.fy = d3.event.y;
+}
+
+const dragended = d => {
+  if (!d3.event.active) simulation.alphaTarget(0);
+  d.fx = null;
+  d.fy = null;
+}
+
 const plot = (data) => {
+  data.nodes = data.nodes.map((d, index) => {
+    d['id'] = index;
+    return d;
+  });
+  const margin = {
+    top: 20,
+    right: 20,
+    bottom: 10,
+    left: 100
+  };
   const width = Math.max((((window.innerWidth / 100) * 80) - margin.right - margin.left), 700);
   const height = ((window.innerHeight / 100) * 80) - margin.bottom - margin.top;
-  const svg = d3.select('svg');  
+  const svg = d3.select('svg')
+    .attr('width', width + margin.left + margin.right + 100)
+    .attr('height', height + margin.top + margin.bottom + 100)
+    .append('g')
+    .attr('transform',
+      `translate(${margin.left}, ${margin.top})`);
+
+  const simulation = d3.forceSimulation()
+    .force('link', d3.forceLink().id(function (d) { return d.id; }))
+    .force('charge', d3.forceManyBody())
+    .force('center', d3.forceCenter(width / 2, height / 2));
+
+  const dragstarted = d => {
+    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+  }
+
+  const dragged = d => {
+    d.fx = d3.event.x;
+    d.fy = d3.event.y;
+  }
+
+  const dragended = d => {
+    if (!d3.event.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+  }
+
+  const link = svg.append('g')
+    .attr('class', 'links')
+    .selectAll('line')
+    .data(data.links)
+    .enter().append('line')
+    .attr('stroke-width', function (d) { return Math.sqrt(d.value); });
+
+  const node = svg.append('g')
+    .attr('class', 'nodes')
+    .selectAll('circle')
+    .data(data.nodes)
+    .enter().append('circle')
+    .attr('r', 5)
+    .attr('fill', '#eee')
+    .call(d3.drag()
+      .on('start', dragstarted)
+      .on('drag', dragged)
+      .on('end', dragended));
+
+  simulation
+    .nodes(data.nodes)
+    .on("tick", ticked);
+
+  simulation.force("link")
+    .links(data.links);
+
+  function ticked() {
+    link
+      .attr("x1", function (d) { return d.source.x; })
+      .attr("y1", function (d) { return d.source.y; })
+      .attr("x2", function (d) { return d.target.x; })
+      .attr("y2", function (d) { return d.target.y; });
+
+    node
+      .attr("cx", function (d) { return d.x; })
+      .attr("cy", function (d) { return d.y; });
+  }
+
 }
 
 const fetchData = () => {
@@ -105,9 +198,9 @@ const fetchData = () => {
 
 const fetchAndPlot = async () => {
   try {
-    const response = await fetchData();   
+    const response = await fetchData();
     console.log(response);
-    plot(response); 
+    plot(response);
   } catch (e) {
     console.error(e);
   }
