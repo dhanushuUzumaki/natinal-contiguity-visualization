@@ -128,7 +128,7 @@ const plot = (data) => {
       `translate(${margin.left}, ${margin.top})`);
 
   const simulation = d3.forceSimulation()
-    .force('link', d3.forceLink().id(function (d) { return d.id; }))
+    .force('link', d3.forceLink().id(function (d) { return d.id; }).distance(100).strength(1))
     .force('charge', d3.forceManyBody())
     .force('center', d3.forceCenter(width / 2, height / 2));
 
@@ -149,6 +149,18 @@ const plot = (data) => {
     d.fy = null;
   }
 
+  const ticked = () => {
+    link
+      .attr("x1", d => d.source.x)
+      .attr("y1", d => d.source.y)
+      .attr("x2", d => d.target.x)
+      .attr("y2", d => d.target.y);
+
+    node
+      .attr("x", function (d) { return d.x = Math.max(5, Math.min(width - 5, d.x)); })
+      .attr("y", function (d) { return d.y = Math.max(5, Math.min(height - 5, d.y)); });
+  }
+
   const link = svg.append('g')
     .attr('class', 'links')
     .selectAll('line')
@@ -158,15 +170,22 @@ const plot = (data) => {
 
   const node = svg.append('g')
     .attr('class', 'nodes')
-    .selectAll('circle')
+    .selectAll('.flag')
     .data(data.nodes)
-    .enter().append('circle')
-    .attr('r', 5)
-    .attr('fill', '#eee')
+    .enter().append('image')
+    .attr('class', d => `flag flag-cz`)
+    .attr("xlink:href", "https://github.com/dhanushuUzumaki/national-contiguity-visualization/flags/blank.gif")
+    .attr("width", "5px")
+    .attr("height", "5px")
+    .attr("x", -8)
+    .attr("y", -8)
     .call(d3.drag()
       .on('start', dragstarted)
       .on('drag', dragged)
       .on('end', dragended));
+
+  node.append("title")
+    .text(function (d) { return d.country; });
 
   simulation
     .nodes(data.nodes)
@@ -174,18 +193,6 @@ const plot = (data) => {
 
   simulation.force("link")
     .links(data.links);
-
-  function ticked() {
-    link
-      .attr("x1", function (d) { return d.source.x; })
-      .attr("y1", function (d) { return d.source.y; })
-      .attr("x2", function (d) { return d.target.x; })
-      .attr("y2", function (d) { return d.target.y; });
-
-    node
-      .attr("cx", function (d) { return d.x; })
-      .attr("cy", function (d) { return d.y; });
-  }
 
 }
 
