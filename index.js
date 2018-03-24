@@ -172,11 +172,13 @@ const plot = (data) => {
     .attr('class', 'nodes')
     .selectAll('.flag')
     .data(data.nodes)
-    .enter().append('image')
+    .enter()
+    .append('foreignobject')
+    .append('img')
+    .attr('src', 'flags/blank.png')
     .attr('class', d => `flag flag-cz`)
-    .attr("xlink:href", "https://github.com/dhanushuUzumaki/national-contiguity-visualization/flags/blank.gif")
-    .attr("width", "5px")
-    .attr("height", "5px")
+    .attr('width', '5px')
+    .attr('height', '5px')
     .attr("x", -8)
     .attr("y", -8)
     .call(d3.drag()
@@ -185,7 +187,8 @@ const plot = (data) => {
       .on('end', dragended));
 
   node.append("title")
-    .text(function (d) { return d.country; });
+    .text(function (d) { return d.country; })
+    .exit();
 
   simulation
     .nodes(data.nodes)
