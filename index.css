@@ -76,8 +76,8 @@ text.mono {
   fill: #aaa;
 }
 
-.link {
-  stroke: var(--whitishBg);
+.links {
+  stroke: var(--primaryDark);
   stroke-opacity: .6;
   stroke-width: 1px;
 }
